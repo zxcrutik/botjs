@@ -1,0 +1,17 @@
+{
+  "name": "vanilla-js-boilerplate-master",
+  "version": "1.0.0",
+  "description": "<p align=\"center\"> <br> <img width=\"240\" src=\"./assets/tapps.png\" alt=\"logo of telegram web apps\"> <br> <br> </p>",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^9.23.0",
+    "telegraf": "^4.16.3"
+  }
+}

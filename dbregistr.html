@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Method App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            --bg-color: var(--tg-theme-bg-color);
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 0;
+            padding: 0;
+            color-scheme: var(--tg-color-scheme);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100vh;
+            background-image: url('assets/mbmain.gif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            padding-bottom: 10px;
+            transition: background-image 0.3s ease;
+        }
+
+        a {
+            color: var(--tg-theme-link-color);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .header h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            margin-bottom: 10px;
+            padding-top: 30px;
+        }
+
+        .header img {
+            width: 50px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            margin-bottom: 20px;
+        }
+
+        #farmingButton {
+            display: block;
+            width: calc(100% - 40px);
+            max-width: 300px;
+            margin: 0 auto 10px;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-family: 'Orbitron', sans-serif;
+            background-color: #2e2e2e;
+            color: #ffffff;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-image 0.3s ease, transform 0.3s ease;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        #farmingButton.disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        #farmingButton.green {
+            background-color: green;
+            color: white;
+        }
+
+        #farmingButton.farming,
+        #farmingButton.claim {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        #farmingButton.farming {
+            background-image: url('assets/farmstate.gif');
+        }
+
+        #farmingButton.claim {
+            background-image: url('assets/feemoz.gif');
+        }
+
+        footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-top: 1px solid #333;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .footer-buttons {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .footer-buttons button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #ddd;
+            flex: 1;
+            font-family: 'Orbitron', sans-serif;
+            margin-top: 12px;
+        }
+
+        .footer-buttons button img {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 5px;
+        }
+
+        .username {
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            text-align: center;
+            font-size: 32px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-shadow: 0 0 10px white;
+        }
+
+        .counter {
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            text-align: center;
+            font-size: 24px;
+            margin-top: 10px;
+            margin-bottom: 50px;
+        }
+
+        #content {
+            flex-grow: 1;
+        }
+
+        .mini-game-container {
+            width: 300px;
+            margin: 30px auto 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-overlay {
+            display: none;
+            position: fixed;
+            top: 5%;
+            left: 5%;
+            width: 90%;
+            height: 80%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            border-radius: 15px;
+            overflow: hidden;
+            touch-action: none;
+            overscroll-behavior: contain;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            position: relative;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            overflow: hidden;
+            touch-action: none;
+            overscroll-behavior: contain;
+        }
+
+        #gameCanvas::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                radial-gradient(2px 2px at 40px 60px, #cccccc, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 20px 50px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 30px 100px, #7f7f7f, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 60px, #4f4f4f, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 110px 90px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 190px 150px, #cccccc, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: stars 100s linear infinite;
+            transform: rotate(45deg);
+        }
+
+        @keyframes stars {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .nebula {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.15;
+            animation: nebula-float 20s infinite alternate;
+        }
+
+        .nebula:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            background-color: rgba(70, 131, 180, 0.3);
+        }
+
+        .nebula:nth-child(2) {
+            bottom: 30%;
+            right: 15%;
+            background-color: rgba(199, 21, 133, 0.3);
+        }
+
+        @keyframes nebula-float {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            50% {
+                transform: translate(10px, 10px) scale(1.1);
+            }
+            100% {
+                transform: translate(-10px, -10px) scale(0.9);
+            }
+        }
+
+        #player {
+            width: 40px;
+            height: 40px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300ffff"><path d="M12 2L1 21h22L12 2zm0 3.516L20.297 19H3.703L12 5.516z"/></svg>');
+            background-size: contain;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .target {
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            animation: fall 3s linear;
+        }
+
+        .bomb {
+            width: 30px;
+            height: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff0000"><circle cx="12" cy="12" r="10"/></svg>');
+            background-size: contain;
+            position: absolute;
+        }
+
+        .special {
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ffffff, #ffff00);
+            border-radius: 50%;
+            position: absolute;
+            box-shadow: 0 0 15px #ffff00, 0 0 30px #ffff00;
+            animation: pulse-special 1s infinite alternate;
+        }
+
+        @keyframes pulse-special {
+            from { 
+                box-shadow: 0 0 15px #ffff00, 0 0 30px #ffff00;
+                transform: scale(1);
+            }
+            to { 
+                box-shadow: 0 0 30px #ffff00, 0 0 60px #ffff00;
+                transform: scale(1.1);
+            }
+        }
+
+        .green-special {
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #00ff00, #008000);
+            border-radius: 50%;
+            position: absolute;
+            box-shadow: 0 0 15px #00ff00, 0 0 30px #008000;
+            animation: pulse-green 1s infinite alternate;
+        }
+
+        @keyframes pulse-green {
+            from { 
+                box-shadow: 0 0 15px #00ff00, 0 0 30px #008000;
+                transform: scale(1);
+            }
+            to { 
+                box-shadow: 0 0 30px #00ff00, 0 0 60px #008000;
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes fall {
+            0% { top: -30px; }
+            100% { top: 100%; }
+        }
+
+        #timer {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ffff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 10;
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #00ffff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+        }
+
+        .mini-game-placeholder {
+            background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+            color: #fbfffc;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 18px;
+            text-align: center;
+            width: 150px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            margin: 0 auto;
+            font-family: 'Orbitron', sans-serif;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mini-game-placeholder::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(76, 175, 80, 0.1),
+                rgba(76, 175, 80, 0.05) 40%,
+                rgba(76, 175, 80, 0) 50%
+            );
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+
+        .mini-game-placeholder:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .mini-game-placeholder.glow {
+            animation: pulse 1.5s ease-in-out;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) rotate(45deg);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 15px 30px rgba(76, 175, 80, 0.4);
+            }
+        }
+
+        .header-image {
+            width: 66.67%;
+            height: auto;
+            margin-top: 20px;
+        }
+
+        .balance-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .balance-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            margin-top: 15px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        .balance-circle:focus {
+            outline: none;
+        }
+
+        .balance-circle::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                from 0deg,
+                rgba(255, 255, 255, 0.1),
+                rgba(192, 192, 192, 0.5),
+                rgba(255, 255, 255, 0.8),
+                rgba(192, 192, 192, 0.5),
+                rgba(255, 255, 255, 0.1)
+            );
+            animation: rotate 10s linear infinite;
+        }
+
+        .balance-circle-inner {
+            position: absolute;
+            inset: 5px;
+            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+            border-radius: 50%;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .balance-wrapper {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .balance-wrapper.active {
+            display: flex;
+        }
+
+        #totalFarmed, #totalMTH {
+            font-size: 21px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .currency {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-top: 3px;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        #balanceCircle {
+            transition: transform 0.3s ease;
+        }
+
+        #balanceCircle:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 400px) {
+            .balance-circle {
+                width: 120px;
+                height: 120px;
+            }
+
+            #totalFarmed, #totalMTH {
+                font-size: 18px;
+            }
+
+            .currency {
+                font-size: 10px;
+            }
+        }
+
+        /* Обновим стил для кнопки фармина */
+        #farmingButton {
+            background: linear-gradient(145deg, #2e2e2e, #1a1a1a);
+            box-shadow: 5px 5px 10px #161616, -5px -5px 10px #363636;
+            transition: all 0.3s ease;
+        }
+
+        #farmingButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 7px 7px 14px #161616, -7px -7px 14px #363636;
+        }
+
+        /* Обновим стиль для футера */
+        footer {
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
+        }
+
+        .footer-buttons button {
+            transition: all 0.3s ease;
+        }
+
+        .footer-buttons button:hover {
+            transform: translateY(-3px);
+            color: #4CAF50;
+        }
+
+        @keyframes flash {
+            0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+            50% { text-shadow: 0 0 20px rgba(255, 255, 255, 1); }
+            100% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+        }
+
+        .balance-flash {
+            animation: flash 0.5s ease-out;
+        }
+
+        #logoButton {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+        }
+
+        #logoButton.pulsating {
+            animation: pulse-and-glow 1.5s infinite;
+        }
+
+        #logoButton.inactive {
+            opacity: 0.5;
+            cursor: not-allowed;
+            animation: none;
+        }
+
+        @keyframes pulse-and-glow {
+            0% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+            }
+            50% {
+                transform: scale(1.05);
+                filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.7));
+            }
+            100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+            }
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .popup-content {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .popup h3 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+
+        .popup p {
+            margin-bottom: 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f2d74e;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            opacity: 0;
+        }
+
+        .close-game {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 2001;
+        }
+
+        .bomb-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 0, 0, 0.3);
+            animation: flash 0.5s;
+        }
+
+        .special-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 0, 0.3);
+            animation: flash 0.5s;
+        }
+
+        .green-special-effect {
+            color: #00ff00;
+        }
+
+        @keyframes flash {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .bomb-effect, .special-effect, .target-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: fadeUp 0.5s ease-out;
+        }
+
+        .bomb-effect {
+            color: #ff0000;
+        }
+
+        .special-effect {
+            color: #ffff00;
+        }
+
+        .target-effect {
+            color: #00ffff;
+        }
+
+        @keyframes fadeUp {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -100%);
+            }
+        }
+
+        .full-screen-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: fadeIn 0.2s ease-out, fadeOut 0.3s ease-in 0.2s;
+        }
+
+        .bomb-effect {
+            background-color: rgba(255, 0, 0, 0.7);
+        }
+
+        .special-effect {
+            background-color: rgba(255, 215, 0, 0.7);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        body.task-page,
+        body.friends-page {
+            background-image: url('assets/friends.jpg');
+        }
+
+        .loading-dots {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        .loading-dots div {
+            position: absolute;
+            top: 33px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        }
+        .loading-dots div:nth-child(1) {
+            left: 8px;
+            animation: loading-dots1 0.6s infinite;
+        }
+        .loading-dots div:nth-child(2) {
+            left: 8px;
+            animation: loading-dots2 0.6s infinite;
+        }
+        .loading-dots div:nth-child(3) {
+            left: 32px;
+            animation: loading-dots2 0.6s infinite;
+        }
+        .loading-dots div:nth-child(4) {
+            left: 56px;
+            animation: loading-dots3 0.6s infinite;
+        }
+        @keyframes loading-dots1 {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+        @keyframes loading-dots3 {
+            0% { transform: scale(1); }
+            100% { transform: scale(0); }
+        }
+        @keyframes loading-dots2 {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(24px, 0); }
+        }
+
+        .balance-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            margin-top: 15px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        .balance-circle:focus {
+            outline: none;
+        }
+
+        .balance-circle::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                from 0deg,
+                rgba(255, 255, 255, 0.1),
+                rgba(192, 192, 192, 0.5),
+                rgba(255, 255, 255, 0.8),
+                rgba(192, 192, 192, 0.5),
+                rgba(255, 255, 255, 0.1)
+            );
+            animation: rotate 10s linear infinite;
+        }
+
+        .balance-circle-inner {
+            position: absolute;
+            inset: 5px;
+            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+            border-radius: 50%;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .balance-wrapper {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .balance-wrapper.active {
+            display: flex;
+        }
+
+        #totalFarmed, #totalMTH {
+            font-size: 21px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .currency {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-top: 3px;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        #balanceCircle {
+            transition: transform 0.3s ease;
+        }
+
+        #balanceCircle:hover {
+            transform: scale(1.05);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #farmingButton.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        #farmingButton.loading::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 20px;
+            height: 20px;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <main>
+       
+
+        <div class="header">
+            <h2>
+                <img src="assets/logo.png" alt="Logo" id="logoButton" class="pulsating">
+            </h2>
+        </div>
+
+        <div id="rewardPopup" class="popup">
+            <div class="popup-content">
+                <h3>The daily task is completed!</h3>
+                <p>You received <span id="rewardAmount"></span> $MTHC</p>
+            </div>
+        </div>
+
+        <div class="balance-container">
+            <div class="username" id="usernameDisplay">
+                <div class="loading-dots">
+                    <div></div><div></div><div></div><div></div>
+                </div>
+            </div>
+            <div class="balance-circle" id="balanceCircle">
+                <div class="balance-circle-inner">
+                    <div class="balance-wrapper active" id="mthcBalance">
+                        <span id="totalFarmed">
+                            <div class="loading-dots">
+                                <div></div><div></div><div></div><div></div>
+                            </div>
+                        </span>
+                        <span class="currency">$MTHC</span>
+                    </div>
+                    <div class="balance-wrapper" id="mthBalance">
+                        <span id="totalMTH">
+                            <div class="loading-dots">
+                                <div></div><div></div><div></div><div></div>
+                            </div>
+                        </span>
+                        <span class="currency">$MTH</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="content"></div>
+        
+        <div class="mini-game-container">
+            <div class="mini-game-placeholder">Game</div>
+            <div class="game-overlay">
+                <span class="close-game">&times;</span>
+                <div id="gameCanvas">
+                    <div id="player"></div>
+                    <div id="score">Счет: <span id="scoreValue">0</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <script src="https://telegram.org/js/telegram-web-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+        <script src="friends.js"></script>
+        <script src="task.js"></script>
+        <script src="minigame.js"></script>
+        <script>
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyDWyM2cBDleys0M6GIDmtBjI4TsImceh5o",
+                authDomain: "method-e6c6c.firebaseapp.com",
+                databaseURL: "https://method-e6c6c-default-rtdb.firebaseio.com",
+                projectId: "method-e6c6c",
+                storageBucket: "method-e6c6c.appspot.com",
+                messagingSenderId: "993831279121",
+                appId: "1:993831279121:web:e1ce833088d75b6c6e6fb0",
+                measurementId: "G-G4N4T1C7NR"
+            };
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+
+            let totalFarmed = 0;
+            let isFarmingInProgress = false;
+
+            // Функция для извлечния параметров из URL
+            function getQueryParams() {
+                const params = {};
+                const queryString = window.location.search.substring(1);
+                const hashString = window.location.hash.substring(1);
+                const regex = /([^&=]+)=([^&]*)/g;
+                let m;
+                while (m = regex.exec(queryString)) {
+                    params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+                }
+                while (m = regex.exec(hashString)) {
+                    params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+                }
+                return params;
+            }
+
+            function simulateLoadDelay(callback, delay = 2000) {
+                setTimeout(callback, delay);
+            }
+
+            // Отображеие имени пользователя после регистрации
+            window.onload = function() {
+                const params = getQueryParams();
+                telegramId = params.telegramId || Telegram.WebApp.initDataUnsafe?.user?.id;
+                if (telegramId) {
+                    localStorage.setItem('telegramId', telegramId);
+                    simulateLoadDelay(() => {
+                        loadUserData(telegramId);
+                    });
+                } else {
+                    console.error('Couldnt get a Telegram ID.');
+                    const usernameDisplay = document.getElementById('usernameDisplay');
+                    if (usernameDisplay) {
+                        usernameDisplay.textContent = 'User data could not be retrieved';
+                    }
+                }
+                checkFarmingStatus();
+            };
+
+            function formatNumber(num) {
+                if (num === 0) return '0';
+                if (num >= 1000000000) {
+                    return (num / 1000000000).toFixed(1) + 'B';
+                } else if (num >= 1000000) {
+                    return (num / 1000000).toFixed(1) + 'M';
+                } else if (num >= 1000) {
+                    return (num / 1000).toFixed(1) + 'K';
+                } else {
+                    return num.toString();
+                }
+            }
+
+            function loadUserData(telegramId) {
+                const userRef = database.ref('users/' + telegramId);
+                const usernameDisplay = document.getElementById('usernameDisplay');
+                const totalFarmedDisplay = document.getElementById('totalFarmed');
+                const totalMTHDisplay = document.getElementById('totalMTH');
+
+                // Показываем анимацию загрузки
+                if (usernameDisplay) {
+                    usernameDisplay.innerHTML = `
+                        <div class="loading-dots">
+                            <div></div><div></div><div></div><div></div>
+                        </div>
+                    `;
+                }
+                if (totalFarmedDisplay) {
+                    totalFarmedDisplay.innerHTML = `
+                        <div class="loading-dots">
+                            <div></div><div></div><div></div><div></div>
+                        </div>
+                    `;
+                }
+                if (totalMTHDisplay) {
+                    totalMTHDisplay.innerHTML = `
+                        <div class="loading-dots">
+                            <div></div><div></div><div></div><div></div>
+                        </div>
+                    `;
+                }
+
+                userRef.once('value').then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const userData = snapshot.val();
+                        console.log('Loaded user data:', userData);
+                        const username = userData.telegramUsername;
+                        const totalFarmed = userData.totalFarmed || 0;
+                        const mthtotalfarmed = userData.mthtotalfarmed || 0;
+                        
+                        console.log('Total farmed:', totalFarmed);
+                        console.log('MTH total farmed:', mthtotalfarmed);
+                        
+                        if (usernameDisplay) {
+                            usernameDisplay.textContent = username;
+                        }
+                        
+                        if (totalFarmedDisplay) {
+                            totalFarmedDisplay.textContent = formatNumber(totalFarmed);
+                        }
+                        
+                        if (totalMTHDisplay) {
+                            totalMTHDisplay.textContent = formatNumber(mthtotalfarmed);
+                        }
+                        
+                        console.log('Total farmed display:', totalFarmedDisplay ? totalFarmedDisplay.textContent : 'Element not found');
+                        console.log('MTH display:', totalMTHDisplay ? totalMTHDisplay.textContent : 'Element not found');
+                        
+                        telegramUsername = username;
+                    } else {
+                        console.log('User data not found in Firebase');
+                        if (usernameDisplay) {
+                            usernameDisplay.textContent = 'User not found';
+                        }
+                        if (totalFarmedDisplay) {
+                            totalFarmedDisplay.textContent = '0';
+                        }
+                        if (totalMTHDisplay) {
+                            totalMTHDisplay.textContent = '0';
+                        }
+                    }
+                }).catch((error) => {
+                    console.error('Error loading user data:', error);
+                });
+            }
+
+            function updateTotalFarmed() {
+                const userRef = database.ref('users/' + telegramId);
+                userRef.update({ totalFarmed: totalFarmed });
+            }
+
+            function updateTotalMTH(amount) {
+                const telegramId = localStorage.getItem('telegramId');
+                if (telegramId) {
+                    const userRef = database.ref('users/' + telegramId);
+                    userRef.once('value').then((snapshot) => {
+                        if (snapshot.exists()) {
+                            const userData = snapshot.val();
+                            let currentTotalMTH = userData.mthtotalfarmed || 0;
+                            let newTotalMTH = currentTotalMTH + amount;
+                            
+                            return userRef.update({ mthtotalfarmed: newTotalMTH });
+                        }
+                    }).then(() => {
+                        console.log('MTH updated successfully');
+                        // Обновляем отображение на странице
+                        const totalMTHDisplay = document.getElementById('totalMTH');
+                        if (totalMTHDisplay) {
+                            let currentDisplayed = parseInt(totalMTHDisplay.textContent) || 0;
+                            let newTotal = currentDisplayed + amount;
+                            totalMTHDisplay.textContent = formatNumber(newTotal);
+                        }
+                    }).catch((error) => {
+                        console.error('Error updating MTH:', error);
+                    });
+                }
+            }
+
+            function animateBalance(startValue, endValue, duration, elementId) {
+                const balanceElement = document.getElementById(elementId);
+                const startTime = performance.now();
+                
+                function updateBalance(currentTime) {
+                    const elapsedTime = currentTime - startTime;
+                    if (elapsedTime > duration) {
+                        balanceElement.textContent = formatNumber(endValue);
+                        balanceElement.classList.add('balance-flash');
+                        setTimeout(() => balanceElement.classList.remove('balance-flash'), 500);
+                        return;
+                    }
+                    
+                    const progress = elapsedTime / duration;
+                    const currentValue = Math.round(startValue + (endValue - startValue) * progress);
+                    balanceElement.textContent = formatNumber(currentValue);
+                    
+                    requestAnimationFrame(updateBalance);
+                }
+                
+                requestAnimationFrame(updateBalance);
+            }
+
+            function startFarming() {
+                const farmingButton = document.getElementById('farmingButton');
+                const telegramId = localStorage.getItem('telegramId');
+
+                farmingButton.classList.add('loading');
+
+                if (farmingButton.classList.contains('green')) {
+                    // Завершение фарминга
+                    const userRef = database.ref('users/' + telegramId);
+                    userRef.once('value', (snapshot) => {
+                        if (snapshot.exists()) {
+                            const userData = snapshot.val();
+                            let currentTotalFarmed = userData.totalFarmed || 0;
+                            let newTotalFarmed = currentTotalFarmed + 60;
+                            
+                            userRef.update({ 
+                                totalFarmed: newTotalFarmed,
+                                farmingState: {
+                                    isActive: false,
+                                    startTime: null,
+                                    endTime: null
+                                }
+                            }).then(() => {
+                                farmingButton.classList.remove('loading', 'green', 'farming', 'claim');
+                                farmingButton.textContent = 'Start Farming';
+                                farmingButton.style.backgroundColor = '#2e2e2e';
+                                animateBalance(currentTotalFarmed, newTotalFarmed, 1000, 'totalFarmed');
+                            });
+                        }
+                    });
+                } else {
+                    // Начало фарминга
+                    const farmingStartTime = Date.now();
+                    const farmingEndTime = farmingStartTime + (6 * 60 * 60 * 1000); // 6 часов в миллисекундах
+
+                    const userRef = database.ref('users/' + telegramId);
+                    userRef.update({
+                        farmingState: {
+                            isActive: true,
+                            startTime: farmingStartTime,
+                            endTime: farmingEndTime
+                        }
+                    }).then(() => {
+                        updateFarmingStatus(farmingEndTime);
+                    });
+                }
+            }
+
+            function updateFarmingStatus(endTime) {
+                const farmingButton = document.getElementById('farmingButton');
+                const currentTime = Date.now();
+                const remainingTime = Math.max(endTime - currentTime, 0);
+
+                if (remainingTime > 0) {
+                    const hours = Math.floor(remainingTime / (60 * 60 * 1000));
+                    const minutes = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
+                    const seconds = Math.floor((remainingTime % (60 * 1000)) / 1000);
+
+                    farmingButton.textContent = `Farming: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    farmingButton.classList.add('farming');
+                    farmingButton.classList.remove('claim', 'loading', 'green');
+                    farmingButton.disabled = true;
+                    setTimeout(() => updateFarmingStatus(endTime), 1000);
+                } else {
+                    setClaimState(farmingButton);
+                }
+            }
+
+            function setClaimState(button) {
+                button.classList.add('green', 'claim');
+                button.classList.remove('farming', 'loading');
+                button.textContent = 'Claim';
+                button.style.backgroundColor = '#2e2e2e';
+                button.disabled = false;
+            }
+
+            function checkFarmingStatus() {
+                const telegramId = localStorage.getItem('telegramId');
+                if (telegramId) {
+                    const farmingButton = document.getElementById('farmingButton');
+                    farmingButton.classList.add('loading');
+
+                    const userRef = database.ref('users/' + telegramId);
+                    userRef.once('value', (snapshot) => {
+                        if (snapshot.exists()) {
+                            const userData = snapshot.val();
+                            const farmingState = userData.farmingState;
+
+                            if (farmingState && farmingState.isActive) {
+                                const currentTime = Date.now();
+                                if (currentTime < farmingState.endTime) {
+                                    // Фарминг все еще активен
+                                    updateFarmingStatus(farmingState.endTime);
+                                } else {
+                                    // Фарминг завершен, но пользователь еще не забрал награду
+                                    setClaimState(farmingButton);
+                                }
+                            } else {
+                                farmingButton.disabled = false;
+                                farmingButton.classList.remove('farming', 'claim', 'green', 'loading');
+                                farmingButton.textContent = 'Start farming';
+                                farmingButton.style.backgroundColor = '#2e2e2e';
+                            }
+                        }
+                    });
+                }
+            }
+
+            window.addEventListener('load', checkFarmingStatus);
+            function openFriendsPage() {
+                document.body.classList.add('friends-page');
+                const content = document.getElementById('content');
+                const farmingButton = document.getElementById('farmingButton');
+                const usernameDisplay = document.getElementById('usernameDisplay');
+                const totalFarmedDisplay = document.getElementById('totalFarmed');
+                const miniGamePlaceholder = document.querySelector('.mini-game-placeholder');
+                const balanceContainer = document.querySelector('.balance-container');
+
+                farmingButton.style.display = 'none';
+                usernameDisplay.style.display = 'none';
+                totalFarmedDisplay.style.display = 'none';
+                miniGamePlaceholder.style.display = 'none';
+                balanceContainer.style.display = 'none';
+
+                content.innerHTML = '';
+
+                fetch('friends.html')
+                    .then(response => response.text())
+                    .then(html => {
+                        content.innerHTML = html;
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const telegramId = urlParams.get('telegramId');
+                        if (telegramId) {
+                            initFriendsPage(telegramId);
+                        } else {
+                            console.error('Telegram ID not found in URL');
+                        }
+                        
+                    })
+                    .catch(error => {
+                        console.error('Error loading the friends page:', error);
+                    });
+            }
+
+            function openTaskPage() {
+                document.body.classList.add('task-page');
+                const content = document.getElementById('content');
+                const farmingButton = document.getElementById('farmingButton');
+                const usernameDisplay = document.getElementById('usernameDisplay');
+                const totalFarmedDisplay = document.getElementById('totalFarmed');
+                const miniGamePlaceholder = document.querySelector('.mini-game-placeholder');
+                const balanceContainer = document.querySelector('.balance-container');
+
+                farmingButton.style.display = 'none';
+                usernameDisplay.style.display = 'none';
+                totalFarmedDisplay.style.display = 'none';
+                miniGamePlaceholder.style.display = 'none';
+                balanceContainer.style.display = 'none';
+
+                content.innerHTML = '';
+
+                const telegramId = localStorage.getItem('telegramId');
+                
+                fetch('task.html')
+                    .then(response => response.text())
+                    .then(html => {
+                        content.innerHTML = html;
+                        if (telegramId) {
+                            initTaskPage(telegramId);
+                        } else {
+                            console.error('Telegram ID was not found when opening the task page');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading the task page:', error);
+                    });
+            }
+
+            function openHomePage() {
+                document.body.classList.remove('friends-page', 'task-page');
+                const content = document.getElementById('content');
+                const farmingButton = document.getElementById('farmingButton');
+                const usernameDisplay = document.getElementById('usernameDisplay');
+                const totalFarmedDisplay = document.getElementById('totalFarmed');
+                const miniGamePlaceholder = document.querySelector('.mini-game-placeholder');
+                const balanceContainer = document.querySelector('.balance-container');
+
+                farmingButton.style.display = 'block';
+                usernameDisplay.style.display = 'block';
+                totalFarmedDisplay.style.display = 'block';
+                miniGamePlaceholder.style.display = 'flex';
+                balanceContainer.style.display = 'flex';
+
+                content.innerHTML = '';
+
+                content.innerHTML = `
+                    <div class="main-content">
+                        <!-- Your main content is here -->
+                    </div>
+                `;
+
+                checkFarmingStatus();
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const placeholder = document.querySelector('.mini-game-placeholder');
+                placeholder.addEventListener('click', function() {
+                    this.classList.add('glow');
+                    setTimeout(() => {
+                        this.classList.remove('glow');
+                    }, 1500);
+                });
+            });
+
+            let clickCount = 0;
+            let isLogoActive = true;
+            let resetTimeout;
+            const MAX_REWARD = 350;
+            const COOLDOWN_TIME = 24 * 60 * 60 * 1000; // 24 часа в миллисекундах
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const logoButton = document.getElementById('logoButton');
+                logoButton.addEventListener('click', handleLogoClick);
+                
+                loadUserData();
+            });
+
+            function loadUserData() {
+                const telegramId = localStorage.getItem('telegramId');
+                if (telegramId) {
+                    const userRef = database.ref('users/' + telegramId);
+                    userRef.once('value', (snapshot) => {
+                        if (snapshot.exists()) {
+                            const userData = snapshot.val();
+                            clickCount = userData.clickCount || 0;
+                            const lastClickTime = userData.lastClickTime || 0;
+                            totalFarmed = userData.totalFarmed || 0;
+                            const totalMTH = userData.mthtotalfarmed || 0;
+                            
+                            displayUsername(userData.telegramUsername);
+                            updateTotalFarmedDisplay();
+                            updateTotalMTHDisplay(totalMTH);
+                            
+                            const currentTime = Date.now();
+                            if (currentTime - lastClickTime < COOLDOWN_TIME) {
+                                setLogoInactive();
+                                const remainingTime = COOLDOWN_TIME - (currentTime - lastClickTime);
+                                setTimeout(setLogoActive, remainingTime);
+                            } else {
+                                setLogoActive();
+                            }
+                            
+                            startResetTimer(lastClickTime);
+                        }
+                    });
+                }
+            }
+
+            function displayUsername(username) {
+                const usernameDisplay = document.getElementById('usernameDisplay');
+                if (usernameDisplay && username) {
+                    usernameDisplay.textContent = username;
+                }
+            }
+
+            function updateTotalFarmedDisplay() {
+                const totalFarmedDisplay = document.getElementById('totalFarmed');
+                if (totalFarmedDisplay) {
+                    totalFarmedDisplay.textContent = formatNumber(totalFarmed);
+                }
+            }
+
+            function updateTotalMTHDisplay(amount) {
+                const totalMTHDisplay = document.getElementById('totalMTH');
+                if (totalMTHDisplay) {
+                    totalMTHDisplay.textContent = formatNumber(amount);
+                }
+            }
+
+            function handleLogoClick() {
+                if (!isLogoActive) return;
+                clearTimeout(resetTimeout);
+                clickCount++;
+                const reward = Math.min(50 * clickCount, MAX_REWARD);
+                
+                updateTotalFarmed(reward);
+                saveUserData(clickCount, Date.now());
+                
+                setLogoInactive();
+                showRewardPopup(reward);
+
+                setTimeout(() => {
+                    setLogoActive();
+                    startResetTimer(Date.now());
+                }, COOLDOWN_TIME);
+            }
+
+            function updateTotalFarmed(reward) {
+                const telegramId = localStorage.getItem('telegramId');
+                if (telegramId) {
+                    const userRef = database.ref('users/' + telegramId);
+                    userRef.once('value', (snapshot) => {
+                        if (snapshot.exists()) {
+                            const userData = snapshot.val();
+                            let currentTotalFarmed = userData.totalFarmed || 0;
+                            let newTotalFarmed = currentTotalFarmed + reward;
+                            
+                            userRef.update({ totalFarmed: newTotalFarmed });
+                            animateBalance(currentTotalFarmed, newTotalFarmed, 1000, 'totalFarmed');
+                        }
+                    });
+                }
+            }
+
+            function saveUserData(newClickCount, lastClickTime) {
+                const telegramId = localStorage.getItem('telegramId');
+                if (telegramId) {
+                    const userRef = database.ref('users/' + telegramId);
+                    userRef.update({ 
+                        clickCount: newClickCount,
+                        lastClickTime: lastClickTime
+                    });
+                }
+            }
+
+            function setLogoInactive() {
+                const logoButton = document.getElementById('logoButton');
+                logoButton.classList.remove('pulsating');
+                logoButton.classList.add('inactive');
+                isLogoActive = false;
+            }
+
+            function setLogoActive() {
+                const logoButton = document.getElementById('logoButton');
+                logoButton.classList.remove('inactive');
+                logoButton.classList.add('pulsating');
+                isLogoActive = true;
+            }
+
+            function startResetTimer(lastClickTime) {
+                clearTimeout(resetTimeout);
+                const currentTime = Date.now();
+                const elapsedTime = currentTime - lastClickTime;
+                const resetTime = 24 * 60 * 60 * 1000; // 24 часа в миллисекундах
+                const remainingTime = Math.max(resetTime - elapsedTime, 0);
+
+                resetTimeout = setTimeout(() => {
+                    clickCount = 0;
+                    saveUserData(0, currentTime);
+                    console.log("Счетчик сброшен. Следующий клик даст +50.");
+                }, remainingTime);
+            }
+
+            function updateTotalFarmed(reward) {
+                const telegramId = localStorage.getItem('telegramId');
+                if (telegramId) {
+                    const userRef = database.ref('users/' + telegramId);
+                    userRef.once('value', (snapshot) => {
+                        if (snapshot.exists()) {
+                            const userData = snapshot.val();
+                            let currentTotalFarmed = userData.totalFarmed || 0;
+                            let newTotalFarmed = currentTotalFarmed + reward;
+                            
+                            userRef.update({ totalFarmed: newTotalFarmed });
+                            animateBalance(currentTotalFarmed, newTotalFarmed, 1000, 'totalFarmed');
+                        }
+                    });
+                }
+            }
+
+            function showRewardPopup(reward) {
+                const popup = document.getElementById('rewardPopup');
+                const rewardAmount = document.getElementById('rewardAmount');
+                rewardAmount.textContent = reward;
+                popup.style.display = 'block';
+                
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                }, 3000);
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const balanceCircle = document.getElementById('balanceCircle');
+                const mthcBalance = document.getElementById('mthcBalance');
+                const mthBalance = document.getElementById('mthBalance');
+
+                balanceCircle.addEventListener('click', function() {
+                    mthcBalance.classList.toggle('active');
+                    mthBalance.classList.toggle('active');
+                });
+            });
+
+          
+        </script>
+    </main>
+
+    <footer>
+        <button id="farmingButton" onclick="startFarming()">Start Farming</button>
+        <div class="footer-buttons">
+            <button onclick="openHomePage()">
+                <img src="assets/undefined - Imgur.png" alt="Home">
+                Home
+            </button>
+            <button onclick="openTaskPage()">
+                <img src="assets/task.png" alt="Task">
+                Task
+            </button>
+            <button onclick="openFriendsPage()">
+                <img src="assets/friends.png" alt="Friends">
+                Friends
+            </button>
+        </div>
+    </footer>
+</body>
+</html>

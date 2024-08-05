@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #0d0d0d;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            transition: background-image 0.3s ease;
+        }
+        body {
+            background-image: url('assets/friends.jpg');
+        }
+        .container {
+            padding: 20px;
+            padding-bottom: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #claimButton {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            padding: 15px 30px;
+            font-size: 18px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px solid white;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px white, 0 0 20px white;
+        }
+        #claimButton:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px white, 0 0 30px white;
+        }
+        #claimButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #userList {
+            list-style-type: none;
+            padding: 0;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        #userList li {
+            margin-bottom: 10px;
+            background: rgba(51, 51, 51, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        h1, h2, #friendsCount {
+            text-align: center;
+            color: white;
+            text-shadow: 0 0 10px white;
+        }
+        footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 0;
+            text-align: center;
+            z-index: 1000;
+        }
+        footer .footer-content {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .popup-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            text-align: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .popup-message.show {
+            opacity: 1;
+        }
+
+        .popup-message .amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Friends</h1>
+        <button id="claimButton" disabled>Claim 0</button>
+        <div id="friendsCount">Number of invited friends: 0</div>
+        <h2>Users invited by you</h2>
+        <ul id="userList"></ul>
+    </div>
+    <div id="popup-message" class="popup-message"></div>
+
+    <footer>
+        <div class="footer-content">
+            <!-- Здесь можно добавить содержимое футера, если необходимо -->
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="friends.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script>
+        function showPopupMessage(message) {
+            const popup = document.getElementById('popup-message');
+            const amountMatch = message.match(/(\d+(?:\.\d+)?)/);
+            const amount = amountMatch ? amountMatch[0] : '';
+            
+            popup.innerHTML = `
+                <p>Вы успешно получили</p>
+                <div class="amount">${amount} $MTHC!</div>
+            `;
+            
+            popup.classList.add('show');
+            
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+            
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

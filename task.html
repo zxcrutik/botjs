@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task page</title>
+    <!-- Подключение шрифта Orbitron -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: #0d0d0d;
+            color: white;
+            margin: 0;
+            padding: 0 0 60px; /* Добавьте отступ снизу для футера */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-image: url('assets/friends.jpg'); /* Путь к вашему изображению */
+            background-size: cover;
+            background-position: center;
+            transition: background-image 0.3s ease;
+        }
+        .content {
+            text-align: center;
+            margin-top: 10px; /* Уменьшаем верхний отступ */
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Центрируем содержимое по горизонтали */
+            padding-left: 20px; /* Добавлен отступ слева */
+            padding-right: 20px; /* Добавлен отступ справа */
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            text-shadow: 0 0 10px white;
+            font-size: 2.5em;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+        .content .tasks {
+            max-width: 500px !important; /* Уменьшаем максимальную ширину */
+            width: 80% !important; /* Уменьшаем ширину */
+            margin: 20px auto !important;
+            padding: 0 30px !important; /* Добавляем отступы по бокам */
+        }
+        .content .task {
+            background: rgba(51, 51, 51, 0.8);
+            border: 1px solid rgba(68, 68, 68, 0.8);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            margin-left: auto !important; /* Центрируем задачу */
+            margin-right: auto !important; /* Центрируем задачу */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid white;
+            box-shadow: 0 0 5px white;
+            transition: box-shadow 0.3s;
+            width: 90% !important; /* Устанвливаем ширину задачи */
+            max-width: 350px !important; /* Ограничиваем максимальную ширину задачи */
+        }
+        .task:hover {
+            box-shadow: 0 0 10px white;
+        }
+        .task-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            min-width: 0; /* Позволяет тексту сжиматься */
+        }
+        .task-content img {
+            width: 20px; /* Задаем фиксированную ширину */
+            height: 20px; /* Задаем фиксированную высоту */
+            margin-right: 8px;
+            filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+            animation: pulse-and-glow 1.5s infinite;
+        }
+
+        @keyframes pulse-and-glow {
+            0% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+            }
+            50% {
+                transform: scale(1.05);
+                filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.7));
+            }
+            100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+            }
+        }
+
+        .task-content p {
+            margin: 0;
+            font-size: 1em;
+            text-shadow: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .task button {
+            background: white;
+            border: none;
+            color: black;
+            padding: 6px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s, box-shadow 0.3s;
+            text-shadow: none;
+            box-shadow: 0 0 5px white, 0 0 10px white, 0 0 20px white;
+            font-size: 0.9em;
+            flex-shrink: 0; /* Предотвращает сжатие кнопки */
+            margin-left: 10px; /* Добавляем отступ слева от кнопки */
+        }
+        .task button:hover {
+            background: #e6e6e6;
+            box-shadow: 0 0 10px white, 0 0 20px white, 0 0 30px white;
+        }
+        .task button.loading {
+            background: gray;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 0;
+            text-align: center;
+            z-index: 1000;
+        }
+        footer .footer-content {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        @media (max-width: 600px) {
+            .content .task {
+                width: 95% !important; /* Немного увеличиваем ширину для мобильных */
+            }
+        }
+
+        /* Added loading animation styles */
+        .loading-dots {
+            display: inline-block;
+            position: relative;
+            width: 40px;
+            height: 20px;
+        }
+        .loading-dots div {
+            position: absolute;
+            top: 8px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #000;
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        }
+        .loading-dots div:nth-child(1) {
+            left: 4px;
+            animation: loading-dots1 0.6s infinite;
+        }
+        .loading-dots div:nth-child(2) {
+            left: 4px;
+            animation: loading-dots2 0.6s infinite;
+        }
+        .loading-dots div:nth-child(3) {
+            left: 16px;
+            animation: loading-dots2 0.6s infinite;
+        }
+        .loading-dots div:nth-child(4) {
+            left: 28px;
+            animation: loading-dots3 0.6s infinite;
+        }
+        @keyframes loading-dots1 {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+        @keyframes loading-dots3 {
+            0% { transform: scale(1); }
+            100% { transform: scale(0); }
+        }
+        @keyframes loading-dots2 {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(12px, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>Task</h1>
+        
+            <div class="task" id="task3">
+                <div class="task-content">
+                    <img src="assets/logo.png" alt="иконка">
+                    <p>Join to Method Community</p>
+                </div>
+                <button id="communityTaskButton" onclick="completeCommunityTask()">Join</button>
+            </div>
+            <div class="task" id="task4">
+                <div class="task-content">
+                    <img src="assets/logo.png" alt="иконка">
+                    <p>Invite Friends</p>
+                </div>
+                <button id="friendsTaskButton" onclick="completeFriendsTask()">0/1</button>
+            </div>
+            <div class="task" id="task5">
+                <div class="task-content">
+                    <img src="assets/logo.png" alt="иконка">
+                    <p>Collect 5000 $MTHC</p>
+                </div>
+                <button id="methodTaskButton" onclick="completeMethodTask()">0/5000</button>
+            </div>
+            
+        </div>
+
+    <footer>
+        <div class="footer-content">
+            <!-- Здесь можно добавить содержимое футера, если необходимо -->
+        </div>
+    </footer>
+</body>
+</html>
